@@ -1,0 +1,348 @@
+/*
+ * Android mobile UX styles for Rotorflight Blackbox Explorer.
+ * Loaded after the stock stylesheets from index.html.
+ */
+
+/* ------------------------------------------------------------------ *
+ * 2) Dropdown menus (View, Zoom, workspace, ...) must never extend
+ *    past the bottom of a phone screen — cap and scroll them.
+ * ------------------------------------------------------------------ */
+.dropdown-menu {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ------------------------------------------------------------------ *
+ * 3) Bootstrap modals (Header dialog, Configure graphs, Keyboard help,
+ *    Settings) are desktop-sized. Constrain them to the viewport and
+ *    let their content pan in both axes so Save/Close always reachable.
+ * ------------------------------------------------------------------ */
+.modal .modal-dialog {
+    margin: 8px auto;
+    max-width: 96vw;
+}
+
+.modal .modal-content {
+    max-height: calc(100vh - 20px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.modal .modal-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* The NW.js update dialog is a native <dialog>. */
+dialog {
+    max-width: 96vw;
+    max-height: 90vh;
+    overflow: auto;
+}
+
+/* ------------------------------------------------------------------ *
+ * 5) Legend / right side panel scrolls when it holds many fields.
+ * ------------------------------------------------------------------ */
+.log-graph-config {
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.log-graph-legend {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ------------------------------------------------------------------ *
+ * 6) The main graph handles its own touch gestures (seek drag + pinch
+ *    zoom in android_mobile.js); stop the browser from hijacking them
+ *    for page pan/zoom. Everywhere else page pinch-zoom still works.
+ * ------------------------------------------------------------------ */
+.log-graph,
+#graphCanvas {
+    touch-action: none;
+}
+
+.log-seek-bar canvas {
+    touch-action: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * 4) Collapsible chrome: body.chrome-collapsed hides the title bar,
+ *    control toolbar, seek bar and status bar so the graph fills the
+ *    screen. Restored via the floating toggle button.
+ * ------------------------------------------------------------------ */
+body.chrome-collapsed nav.navbar,
+body.chrome-collapsed .video-top-controls,
+body.chrome-collapsed .log-seek-bar,
+body.chrome-collapsed #status-bar,
+body.chrome-collapsed .log-graph-config {
+    display: none !important;
+}
+
+/* The graph row normally reserves fixed offsets for the chrome
+ * (html.has-log .graph-row: top 100px / bottom 80px). Reclaim them. */
+body.chrome-collapsed .graph-row {
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+#mobileChromeToggle {
+    position: fixed;
+    right: 10px;
+    bottom: 42px;
+    z-index: 10050;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(30, 30, 30, 0.55);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    font-size: 24px;
+    line-height: 44px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.chrome-collapsed #mobileChromeToggle {
+    background: rgba(30, 30, 30, 0.75);
+}
+
+/* Hidden until a log is loaded — visibility driven by android_mobile.js. */
+#mobileChromeToggle {
+    display: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * Compact chrome. Upstream sizes the bars, fonts and legend for a
+ * desktop window; on a phone or tablet that eats most of the screen.
+ * Shrink them so the graph gets the space.
+ *
+ * The .graph-row offsets are NOT set here — upstream pins them with
+ * hard-coded px (and !important inside a media query), so
+ * android_mobile.js measures the real bar heights and sets them.
+ * ------------------------------------------------------------------ */
+
+/* Title bar */
+nav.navbar {
+    margin-bottom: 0 !important;
+    min-height: 0 !important;
+}
+
+.navbar-static-top .container.header-pane {
+    padding-left: 6px;
+    padding-right: 6px;
+}
+
+/* The logo block positions its "Blackbox Explorer" caption and the filename
+ * with hand-tuned offsets keyed to the 35px logo (see .navbar-logo span:
+ * left:-160px; top:30px). Resizing the image alone makes them overlap, so
+ * scale the whole block instead — the internal geometry stays intact. */
+.navbar-logo {
+    transform: scale(0.72);
+    transform-origin: left center;
+}
+
+/* The "Blackbox Explorer" caption sits at top:30px inside that block, so a
+ * short title bar clips it. The logo already identifies the app. (Only the
+ * caption is hidden — the hamburger's icon-bar spans live outside
+ * .navbar-logo, and the filename is a separate <a>.) */
+.navbar-logo span {
+    display: none !important;
+}
+
+/* The filename is positioned at "left: 75%" of the logo block, and hiding
+ * the caption narrows that block — which slid the filename on top of the
+ * logo. Pin it just clear of the 250px logo instead (pre-scale coords). */
+.navbar-logo a.log-filename {
+    left: 262px !important;
+    width: auto !important;
+    white-space: nowrap;
+}
+
+.navbar-toggle {
+    padding: 3px 6px;
+    margin: 3px 4px 3px 0;
+}
+
+/* Wide screens (tablets) show the export buttons inline in the title bar
+ * instead of behind the ☰; Bootstrap sizes them for a desktop. */
+.navbar-form {
+    margin: 0 !important;
+    padding: 2px 0 !important;
+    min-height: 0 !important;
+}
+
+.navbar .btn,
+.navbar-form .btn {
+    padding: 3px 8px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+}
+
+.navbar .glyphicon {
+    font-size: 13px;
+}
+
+/* Control toolbar (View / transport / Speed / Zoom / workspace).
+ * Height must stay auto: above 1020px upstream also shows section captions
+ * ("View", "Playback", "Zoom"…), and a fixed height would clip them. */
+ul.video-top-controls {
+    height: auto !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    margin-bottom: 0 !important;
+}
+
+.video-top-controls h4 {
+    font-size: 9px !important;
+    margin: 0 0 1px 0 !important;
+    line-height: 1.1 !important;
+}
+
+.video-top-controls .btn,
+.video-top-controls .dropdown-toggle {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+}
+
+.video-top-controls .form-control,
+.video-top-controls select,
+.video-top-controls input {
+    height: 22px !important;
+    font-size: 11px !important;
+    padding: 1px 4px !important;
+}
+
+.video-top-controls .glyphicon {
+    font-size: 11px;
+}
+
+/* Seek bar */
+.log-seek-bar canvas {
+    height: 28px !important;
+    margin-top: 2px !important;
+}
+
+html.has-log .log-seek-bar,
+html.has-video .log-seek-bar {
+    bottom: 15px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+
+    /* Upstream makes this bar "position: fixed" but never gives it a width or
+     * left/right, so it shrink-to-fits. On a desktop at dpr 1 that happens to
+     * land near the window width; at dpr 2 it collapsed to ~28%, which is why
+     * the activity waveform only covered a fraction of the screen. Pin it. */
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Status bar */
+#status-bar {
+    height: 15px !important;
+    line-height: 15px !important;
+    font-size: 9px !important;
+    padding: 0 6px !important;
+}
+
+/* Upstream adds margin-top:1em to .graph-row, which sits on top of the
+ * measured offset and wastes a line of height. */
+.graph-row {
+    margin-top: 0 !important;
+}
+
+/* Legend / right side panel */
+.log-graph-config {
+    min-width: 90px !important;
+    padding: 4px 6px !important;
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+div.log-graph-config h2,
+#legend_title {
+    font-size: 12px !important;
+    margin: 0 0 2px 0 !important;
+}
+
+div.log-graph-config h3 {
+    font-size: 11px !important;
+    margin-top: 2px !important;
+}
+
+.log-graph-config .log-date,
+.log-graph-config .log-index {
+    font-size: 9px !important;
+}
+
+.log-graph-legend {
+    font-size: 74% !important;
+    margin-bottom: 4px !important;
+}
+
+.log-graph-config .btn {
+    padding: 2px 6px !important;
+    font-size: 11px !important;
+}
+
+/* A phone in landscape only has ~320 CSS px of height, where even the
+ * compact bars cost a third of the screen. Squeeze them further there. */
+@media (max-height: 430px) {
+    .log-seek-bar canvas {
+        height: 20px !important;
+    }
+
+    .video-top-controls .btn,
+    .video-top-controls .dropdown-toggle {
+        padding: 1px 5px !important;
+        font-size: 10px !important;
+    }
+
+    .video-top-controls .form-control,
+    .video-top-controls select,
+    .video-top-controls input {
+        height: 20px !important;
+        font-size: 10px !important;
+    }
+
+    #status-bar {
+        height: 13px !important;
+        line-height: 13px !important;
+        font-size: 8px !important;
+    }
+
+    html.has-log .log-seek-bar,
+    html.has-video .log-seek-bar {
+        bottom: 13px !important;
+    }
+}
+
+/* The floating toggle sits above the (now shorter) bottom bars, and on the
+ * left so it never covers the legend's "Graph setup" button. */
+#mobileChromeToggle {
+    width: 38px;
+    height: 38px;
+    font-size: 19px;
+    line-height: 36px;
+    bottom: 52px;
+    left: 8px;
+    right: auto;
+}
+
+body.chrome-collapsed #mobileChromeToggle {
+    bottom: 10px;
+}

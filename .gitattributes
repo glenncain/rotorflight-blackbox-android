@@ -1,0 +1,5 @@
+# Store every file exactly as it is on disk. The vendored web app came from an
+# upstream checkout, and letting a machine's core.autocrlf rewrite line endings
+# would make identical files hash differently — which has caused false "locally
+# modified" alarms on these machines before.
+* -text
