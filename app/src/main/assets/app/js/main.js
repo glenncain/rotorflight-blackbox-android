@@ -846,6 +846,13 @@ function BlackboxLogViewer() {
         hasLog: function() { return !!flightLog; },
         loadFiles: function(files) { loadFiles(files); },
         invalidateGraph: function() { invalidateGraph(); },
+        // Same toggles as the I / O keys (see the keydown handler).
+        toggleInTime: function() {
+            setVideoInTime(videoExportInTime === currentBlackboxTime ? false : currentBlackboxTime);
+        },
+        toggleOutTime: function() {
+            setVideoOutTime(videoExportOutTime === currentBlackboxTime ? false : currentBlackboxTime);
+        },
     };
 
     prefs.get('videoConfig', function(item) {
