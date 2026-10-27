@@ -9,6 +9,7 @@
  *  - Floating button that collapses/restores all UI chrome around the graph.
  *  - Two-finger pinch zoom on the main graph, anchored at the pinch point.
  *  - Touch placement of the analyser's frequency/RPM marker line.
+ *  - IN / OUT buttons for the I / O keyboard marks.
  */
 (function () {
     'use strict';
@@ -287,12 +288,23 @@
      * No preventDefault on touchstart: the analyser's toolbar (spectrum type,
      * filters, enlarge) is revealed by .analyser:hover, which on a
      * touchscreen comes from the emulated mouse events a tap produces.
+     *
+     * That toolbar sits over the top of the plot, exactly where the marker's
+     * "Hz (rpm)" readout and the filter labels are drawn. Upstream hides it
+     * while Shift is held; here placing the marker hides it (class
+     * .android-marker-mode), and it stays hidden so the readout can be read
+     * after lifting the finger. A touch in the top strip, where the toolbar
+     * lives, brings it back instead of moving the marker.
      * ------------------------------------------------------------------ */
+    var ANALYSER_TOOLBAR_STRIP_PX = 24;
+
     function setupAnalyserTouch() {
         var canvas = document.getElementById('analyserCanvas');
-        if (!canvas || !window.GraphSpectrumPlot) {
+        var analyserElem = document.getElementById('analyser');
+        if (!canvas || !analyserElem || !window.GraphSpectrumPlot) {
             return;
         }
+        var toolbarGesture = false;
 
         function placeMarker(e) {
             if (e.touches.length !== 1) {
@@ -312,12 +324,53 @@
             return true;
         }
 
-        canvas.addEventListener('touchstart', placeMarker);
+        canvas.addEventListener('touchstart', function (e) {
+            var rect = canvas.getBoundingClientRect();
+            toolbarGesture = e.touches.length === 1 &&
+                e.touches[0].clientY - rect.top < ANALYSER_TOOLBAR_STRIP_PX;
+            if (toolbarGesture) {
+                analyserElem.classList.remove('android-marker-mode');
+            } else if (placeMarker(e)) {
+                analyserElem.classList.add('android-marker-mode');
+            }
+        });
         canvas.addEventListener('touchmove', function (e) {
-            if (placeMarker(e)) {
+            if (!toolbarGesture && placeMarker(e)) {
                 e.preventDefault();
             }
         });
+    }
+
+    /* ------------------------------------------------------------------ *
+     * In / Out marks. Upstream sets them only with the I and O keys; they
+     * bound the analyser's sample window and the video export range.
+     * Add IN / OUT buttons to the Playback group for touch.
+     * ------------------------------------------------------------------ */
+    function setupInOutButtons() {
+        var group = document.querySelector('.log-playback-panel .btn-group');
+        if (!group) {
+            return;
+        }
+        var marks = document.createElement('div');
+        marks.className = 'btn-group android-inout';
+        marks.setAttribute('role', 'group');
+        [['IN', 'toggleInTime', 'Mark the start (IN) of the analyser / video export range here; tap again at the same time to clear (key I)'],
+         ['OUT', 'toggleOutTime', 'Mark the end (OUT) of the analyser / video export range here; tap again at the same time to clear (key O)']]
+            .forEach(function (def) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-default';
+                btn.textContent = def[0];
+                btn.title = def[2];
+                btn.addEventListener('click', function () {
+                    var a = api();
+                    if (a && a.hasLog() && a[def[1]]) {
+                        a[def[1]]();
+                    }
+                });
+                marks.appendChild(btn);
+            });
+        group.parentNode.appendChild(marks);
     }
 
     /* ------------------------------------------------------------------ */
@@ -326,6 +379,7 @@
         setupPinchZoom();
         setupTooltipDismiss();
         setupAnalyserTouch();
+        setupInOutButtons();
     });
 
     window.addEventListener('load', function () {

@@ -128,6 +128,22 @@ android/
                                          webm-writer (runtime dist only)
 ```
 
+## Analyser IN/OUT marks and uncovered marker readout (versionCode 8)
+
+- **IN / OUT buttons.** The analyser's sample window (and the video export
+  range) is set only with the `I` and `O` keys upstream; there is no button.
+  `android_mobile.js` adds IN and OUT buttons beside the Playback group. Each
+  toggles exactly like its key: mark at the current time, or clear when
+  pressed again at the same time. They call two new `androidApi` methods in
+  `js/main.js` (`toggleInTime` / `toggleOutTime`).
+- **Toolbar covered the marker readout.** The analyser's toolbar (spectrum
+  type, filter selection, enlarge) is drawn over the top of the plot, which is
+  where the marker's "Hz (rpm)" label and the filter labels sit. Upstream
+  hides it while Shift is held. Now placing the marker by touch hides the
+  toolbar (`#analyser.android-marker-mode`) and it stays hidden after the
+  finger lifts; a touch in the top 24px strip of the analyser brings it back
+  instead of moving the marker.
+
 ## Analyser menu entry and touch frequency marker (versionCode 7)
 
 Both are upstream behaviours that only bite without a keyboard; the vendored
@@ -255,8 +271,8 @@ and WebView's own (no-op) attempt is ignored.
     `html.has-log .graph-row`.
   - Dropdown menus capped at 70vh and scrollable; Bootstrap modals constrained
     to the viewport and pannable; legend panel scrollable.
-- `js/main.js` — added `this.androidApi` (graph/time/loadFiles accessors) for
-  the mobile layer.
+- `js/main.js` — added `this.androidApi` (graph/time/loadFiles accessors, and
+  since versionCode 8 the IN/OUT toggles) for the mobile layer.
 
 ## Local patches to the web app (beyond the shims)
 

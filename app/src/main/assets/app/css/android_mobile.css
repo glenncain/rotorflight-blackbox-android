@@ -68,6 +68,21 @@ html:not(.has-analyser) .dropdown-menu a.view-analyser {
     display: block;
 }
 
+/* Analyser toolbar hidden while the touch frequency marker is in use, so
+ * it does not cover the marker readout (see setupAnalyserTouch). */
+#analyser.android-marker-mode #spectrumType,
+#analyser.android-marker-mode #overdrawSpectrumType,
+#analyser.android-marker-mode #analyserResize {
+    opacity: 0 !important;
+    height: 0 !important;
+    pointer-events: none;
+}
+
+/* IN / OUT buttons sit beside the Playback group. */
+.android-inout {
+    margin-left: 4px;
+}
+
 /* ------------------------------------------------------------------ *
  * 6) The main graph handles its own touch gestures (seek drag + pinch
  *    zoom in android_mobile.js); stop the browser from hijacking them
