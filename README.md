@@ -81,8 +81,12 @@ keystore via `apksigner`.
 ### Building on GitHub
 
 `.github/workflows/release.yml` runs `clean assembleDebug` on a GitHub runner
-and publishes the APK as a GitHub release (tag `v<versionName>-build<versionCode>`).
-Start it from the Actions tab with **Run workflow**, or push a `v*` tag. The
+and keeps the APK as a downloadable artifact on the run. Runs on `main` or a
+`v*` tag also publish it as a GitHub release (tag
+`v<versionName>-build<versionCode>`); pull requests and runs on other branches
+build only, so an untested branch never becomes a public release. It runs on
+every pull request; otherwise start it from the Actions tab with **Run
+workflow**, or push a `v*` tag. The
 runner signs with its own throwaway debug key, so its APK will not install over
 one built locally: uninstall the existing app first.
 
