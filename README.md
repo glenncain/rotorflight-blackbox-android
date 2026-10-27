@@ -128,6 +128,18 @@ android/
                                          webm-writer (runtime dist only)
 ```
 
+## Toolbar no longer overlaps the top of the graph (versionCode 9)
+
+Upstream pins the control toolbar with `html.has-log .video-top-controls {
+position: fixed; top: 50px }`, the height of its desktop title bar. The
+compact title bar is ~30px, so the toolbar sat 20px lower than the space
+`layoutGraphRow()` reserved for it and covered the top 20px of the graph,
+including the analyser's frequency readout (measured in Chromium at
+1280×800, 800×1280 and 740×420: toolbar bottom 89/76/90px vs graph top
+69/55/69px). `layoutGraphRow()` now sets the toolbar's `top` to the measured
+title-bar height; afterwards toolbar bottom equals graph top at all three
+sizes.
+
 ## Analyser IN/OUT marks and uncovered marker readout (versionCode 8)
 
 - **IN / OUT buttons.** The analyser's sample window (and the video export

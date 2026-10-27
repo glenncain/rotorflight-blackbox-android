@@ -95,7 +95,16 @@
         if (!row || getComputedStyle(row).display === 'none') {
             return;
         }
-        var top = visibleHeight('nav.navbar') + visibleHeight('.video-top-controls');
+        // Upstream also pins the toolbar at top: 50px, the height of its
+        // desktop title bar. The compact title bar is ~30px, which left a gap
+        // above the toolbar and pushed it 20px down over the top of the
+        // graph (and the analyser's readout). Butt it against the title bar.
+        var navHeight = visibleHeight('nav.navbar');
+        var toolbar = document.querySelector('.video-top-controls');
+        if (toolbar) {
+            toolbar.style.setProperty('top', Math.round(navHeight) + 'px', 'important');
+        }
+        var top = navHeight + visibleHeight('.video-top-controls');
         var bottom = visibleHeight('.log-seek-bar') + visibleHeight('#status-bar');
 
         top = Math.round(top);
