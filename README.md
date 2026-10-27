@@ -81,8 +81,12 @@ keystore via `apksigner`.
 ### Building on GitHub
 
 `.github/workflows/release.yml` runs `clean assembleDebug` on a GitHub runner
-and publishes the APK as a GitHub release (tag `v<versionName>-build<versionCode>`).
-Start it from the Actions tab with **Run workflow**, or push a `v*` tag. The
+and keeps the APK as a downloadable artifact on the run. Runs on `main` or a
+`v*` tag also publish it as a GitHub release (tag
+`v<versionName>-build<versionCode>`); pull requests and runs on other branches
+build only, so an untested branch never becomes a public release. It runs on
+every pull request; otherwise start it from the Actions tab with **Run
+workflow**, or push a `v*` tag. The
 runner signs with its own throwaway debug key, so its APK will not install over
 one built locally: uninstall the existing app first.
 
@@ -123,6 +127,33 @@ android/
             └── node_modules/            bootstrap, lodash, html2canvas,
                                          webm-writer (runtime dist only)
 ```
+
+## Analyser menu entry and touch frequency marker (versionCode 7)
+
+Both are upstream behaviours that only bite without a keyboard; the vendored
+files stay untouched and the fixes live in the mobile layer.
+
+- **"Analyser" missing from the View menu.** Upstream `main.css` has
+  `html:not(.has-analyser) a.view-analyser { display: none }`, so the menu
+  entry exists only while the analyser is already on — it can switch it off
+  but never on. (With no video loaded "Video" is hidden too, which leaves
+  Craft and Sticks.) Desktop users don't notice: wide windows show toolbar
+  buttons instead of the menu, and the `A` key toggles it. The View menu
+  appears below 887 CSS px (1151 with a video), e.g. a phone or a tablet in
+  portrait. `android_mobile.css` keeps the entry visible; its colour still
+  shows the on/off state.
+- **Frequency/RPM marker line would not move.** `graph_spectrum.js`
+  `trackFrequency()` only moves the green marker (and its 2×–4× harmonics)
+  while **Shift** is held, and its `touchmove` binding goes through the same
+  check — reading `clientX` off the TouchEvent, which has none. On a
+  touchscreen the line can never be placed. `android_mobile.js` sets the
+  marker from the touch position (tap, or drag one finger across the
+  analyser) and redraws via `graph.getAnalyser().refresh()`. It does not
+  `preventDefault()` the `touchstart`, because the analyser's toolbar is
+  revealed by `.analyser:hover`, which on touch comes from the emulated mouse
+  events of a tap.
+
+Both are candidates to report upstream.
 
 ## Seek bar width and touch tooltips (versionCode 5)
 

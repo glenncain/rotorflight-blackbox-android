@@ -1,9 +1,12 @@
-# Builds the debug APK and publishes it as a GitHub release.
+# Builds the debug APK. On main or a v* tag it is also published as a GitHub
+# release; anywhere else (pull requests, runs on other branches) the APK is
+# only kept as a downloadable build artifact on the run.
 # Run it from the Actions tab ("Run workflow"), or push a tag like v2.3.0-build6.
 name: Build APK release
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     tags: ['v*']
 
@@ -24,7 +27,21 @@ jobs:
       - name: Build
         run: bash ./gradlew --no-daemon clean assembleDebug
 
+      - name: Name APK
+        run: |
+          name=$(grep -oP 'versionName "\K[^"]+' app/build.gradle)
+          code=$(grep -oP 'versionCode \K[0-9]+' app/build.gradle)
+          apk="rotorflight-blackbox-${name}-build${code}-debug"
+          cp app/build/outputs/apk/debug/app-debug.apk "$apk.apk"
+          echo "APK_NAME=$apk" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_NAME }}
+          path: ${{ env.APK_NAME }}.apk
+
       - name: Publish release
+        if: github.ref == 'refs/heads/main' || github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

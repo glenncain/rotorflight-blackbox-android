@@ -57,6 +57,18 @@ dialog {
 }
 
 /* ------------------------------------------------------------------ *
+ * View menu: upstream hides the "Analyser" entry whenever the analyser
+ * is off (main.css: html:not(.has-analyser) a.view-analyser), so the menu
+ * can switch it off but never back on. On a desktop that goes unnoticed:
+ * wide windows show the toolbar buttons instead, and the "A" key works.
+ * On a narrower screen with no keyboard it is the only way in. Keep the
+ * entry visible; its colour still shows whether the analyser is on.
+ * ------------------------------------------------------------------ */
+html:not(.has-analyser) .dropdown-menu a.view-analyser {
+    display: block;
+}
+
+/* ------------------------------------------------------------------ *
  * 6) The main graph handles its own touch gestures (seek drag + pinch
  *    zoom in android_mobile.js); stop the browser from hijacking them
  *    for page pan/zoom. Everywhere else page pinch-zoom still works.
