@@ -8,6 +8,7 @@
  *  - Restores the last opened log after the app process is recreated.
  *  - Floating button that collapses/restores all UI chrome around the graph.
  *  - Two-finger pinch zoom on the main graph, anchored at the pinch point.
+ *  - Touch placement of the analyser's frequency/RPM marker line.
  */
 (function () {
     'use strict';
@@ -274,11 +275,57 @@
         logGraph.addEventListener('touchcancel', endPinch, true);
     }
 
+    /* ------------------------------------------------------------------ *
+     * Analyser frequency marker. Upstream draws the movable green
+     * frequency/RPM line (plus its 2x-4x harmonics) only while Shift is held
+     * during a mouse move (graph_spectrum.js trackFrequency). Its touchmove
+     * binding goes through the same Shift check, and would read clientX off
+     * the TouchEvent itself, so on a touchscreen the line can never be
+     * placed. Drive it from the touch position instead: tap or drag a finger
+     * across the analyser.
+     *
+     * No preventDefault on touchstart: the analyser's toolbar (spectrum type,
+     * filters, enlarge) is revealed by .analyser:hover, which on a
+     * touchscreen comes from the emulated mouse events a tap produces.
+     * ------------------------------------------------------------------ */
+    function setupAnalyserTouch() {
+        var canvas = document.getElementById('analyserCanvas');
+        if (!canvas || !window.GraphSpectrumPlot) {
+            return;
+        }
+
+        function placeMarker(e) {
+            if (e.touches.length !== 1) {
+                return false;
+            }
+            var a = api();
+            var graph = a && a.getGraph();
+            var analyser = graph && graph.getAnalyser && graph.getAnalyser();
+            if (!analyser) {
+                return false;
+            }
+            var rect = canvas.getBoundingClientRect();
+            GraphSpectrumPlot.setMousePosition(
+                e.touches[0].clientX - rect.left,
+                e.touches[0].clientY - rect.top);
+            analyser.refresh();
+            return true;
+        }
+
+        canvas.addEventListener('touchstart', placeMarker);
+        canvas.addEventListener('touchmove', function (e) {
+            if (placeMarker(e)) {
+                e.preventDefault();
+            }
+        });
+    }
+
     /* ------------------------------------------------------------------ */
     document.addEventListener('DOMContentLoaded', function () {
         setupChromeToggle();
         setupPinchZoom();
         setupTooltipDismiss();
+        setupAnalyserTouch();
     });
 
     window.addEventListener('load', function () {
