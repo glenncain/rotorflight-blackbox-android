@@ -78,6 +78,14 @@ APK output: `app/build/outputs/apk/debug/app-debug.apk`
 For a release (unsigned) build use `assembleRelease`; sign it with your own
 keystore via `apksigner`.
 
+### Building on GitHub
+
+`.github/workflows/release.yml` runs `clean assembleDebug` on a GitHub runner
+and publishes the APK as a GitHub release (tag `v<versionName>-build<versionCode>`).
+Start it from the Actions tab with **Run workflow**, or push a `v*` tag. The
+runner signs with its own throwaway debug key, so its APK will not install over
+one built locally: uninstall the existing app first.
+
 ### Alternative: the portable toolchain used to develop this
 
 A pinned, offline JDK 17 + Android SDK 34 + Gradle 8.7 lives in `..\buildtools`
